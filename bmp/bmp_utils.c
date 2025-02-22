@@ -68,7 +68,7 @@ void printBMPInfoHeader(BMPInfoHeader *ih) {
     printf("\nPlanes: %u \t\t\tsize: %lu bytes", ih->planes, sizeof(ih->planes));
     printf("\nBits per pixel: %u \t\tsize: %lu bytes", ih->bitsPerPixel, sizeof(ih->bitsPerPixel));
     printf("\nCompression: %u \t\t\tsize: %lu bytes", ih->compression, sizeof(ih->compression));
-    printf("\nImage size: %i bytes \t\t\tsize: %lu bytes", ih->imageSize, sizeof(ih->imageSize));
+    printf("\nImage size: %i bytes \tsize: %lu bytes", ih->imageSize, sizeof(ih->imageSize));
     printf("\nX-resolution: %u \t\tsize: %lu bytes", ih->horizontalResolution, sizeof(ih->horizontalResolution));
     printf("\nY-resolution: %u \t\tsize: %lu bytes", ih->verticalResolution, sizeof(ih->verticalResolution));
     printf("\nColors: %u \t\t\tsize: %lu bytes", ih->colors, sizeof(ih->colors));

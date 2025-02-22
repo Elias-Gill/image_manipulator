@@ -11,7 +11,7 @@
 typedef struct {
     unsigned short signature;   // 2 bytes. Always "BM" expected.
     unsigned int fileSize;      // 4 bytes. Contains the filesize in BYTES.
-    unsigned int reserved;      // 4 bytes. The value is supposed to be 0 and not used.
+    unsigned int reserved;      // 4 bytes. This value is supposed to be 0 and not used.
     unsigned int dataOffset;    // 4 bytes. Offset from beginning of file 
                                 // to the beginning of the bitmap data in bytes.
 } BMPFileHeader;
@@ -20,10 +20,10 @@ typedef struct {
    for the bitmap */
 typedef struct {
     // Image resolution and size specification
-    unsigned int size;
-    unsigned int width;
-    unsigned int height;
-    unsigned short planes;
+    unsigned int size;                  // size of the info header (40 bytes)
+    unsigned int width;                 // image width
+    unsigned int height;                // image height
+    unsigned short planes;              // expected to be 1
     unsigned short bitsPerPixel;        // 1: monochrome, 4: 16 colors, 8: 256 colors and so on.
 
     // All of these headers are specific for compressed images. If the image has no compression then, 
