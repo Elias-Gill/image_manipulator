@@ -31,13 +31,14 @@ int main() {
         return 1;
     }
 
-    printf("\nExtracting file data\nFile: %s\n", file);
+    printf("\nExtracting file data\nFile: %s", file);
 
     BMPImage *image = openImage(fd);
     if (image == NULL) {
         return 1;
     }
-    printBMPFileHeader(&image->fileHeader);
+
+    printBMPImageInfo(image);
 
     // free resources
     fclose(fd);
