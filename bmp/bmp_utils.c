@@ -33,10 +33,19 @@ BMPImage* openImage(FILE *fd) {
     fread(&infoHeader->imageSize, sizeof(infoHeader->imageSize), 1, fd);
     fread(&infoHeader->horizontalResolution, sizeof(infoHeader->horizontalResolution), 1, fd);
     fread(&infoHeader->verticalResolution, sizeof(infoHeader->verticalResolution), 1, fd);
-    fread(&infoHeader->colors, sizeof(infoHeader->colors), 1, fd);
+    fread(&infoHeader->usedColors, sizeof(infoHeader->usedColors), 1, fd);
     fread(&infoHeader->importantColors, sizeof(infoHeader->importantColors), 1, fd);
 
-    // TODO: read info header, colors list and data
+    // Read colors table
+    if (infoHeader->bitsPerPixel < 8) {
+        unsigned int n = 1 << infoHeader->bitsPerPixel; // exponentiation
+        image->colorTable = malloc(sizeof(ColorInfo) * n);
+        for (unsigned int i = 0; i < n; i++) {
+            ColorInfo *aux = malloc(sizeof(ColorInfo));
+            fread(aux, sizeof(ColorInfo), 1, fd);
+            image->colorTable[i] = aux;
+        }
+    }
 
     return image;
 }
@@ -71,7 +80,7 @@ void printBMPInfoHeader(BMPInfoHeader *ih) {
     printf("\nImage size: %i bytes \tsize: %lu bytes", ih->imageSize, sizeof(ih->imageSize));
     printf("\nX-resolution: %u \t\tsize: %lu bytes", ih->horizontalResolution, sizeof(ih->horizontalResolution));
     printf("\nY-resolution: %u \t\tsize: %lu bytes", ih->verticalResolution, sizeof(ih->verticalResolution));
-    printf("\nColors: %u \t\t\tsize: %lu bytes", ih->colors, sizeof(ih->colors));
+    printf("\nUsed colors: %u \t\t\tsize: %lu bytes", ih->usedColors, sizeof(ih->usedColors));
     printf("\nImportant colors: %u \t\tsize: %lu bytes", ih->importantColors, sizeof(ih->importantColors));
 }
 
@@ -79,6 +88,8 @@ void printBMPImageInfo(BMPImage *img){
     printBMPFileHeader(&img->fileHeader);
     printBMPInfoHeader(&img->infoHeader);
 }
+
+// TODO: print color table info
 
 // Convert bytes to KB, MB or GB
 void formatBytes(unsigned int bytes, char *output) {

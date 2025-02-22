@@ -34,7 +34,7 @@ typedef struct {
     unsigned int verticalResolution;    // 0 if no compression
 
     // Color table information
-    unsigned int colors;                // 256 if using 8bit encoding
+    unsigned int usedColors;            // 256 if using 8bit encoding
     unsigned int importantColors;       // 0 = all
 } BMPInfoHeader;
 
@@ -50,7 +50,7 @@ typedef struct {
 typedef struct {
     BMPFileHeader fileHeader;
     BMPInfoHeader infoHeader;
-    ColorInfo     *colorTable;  // A list of data for the colors
+    ColorInfo     **colorTable;  // A list of data for the colors (thats why a double pointer)
     char          *content;     // The Image.size pixels of the image
 } BMPImage;
 
