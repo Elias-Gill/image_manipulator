@@ -4,18 +4,25 @@
 #include<stdlib.h>
 #include<string.h>
 
-void formatBytes(unsigned int bytes, char *output);
+int loadImage(char *inputFile, BMPImage *image) {
+    if (image == NULL) {
+        printf("Bad use of loadImage(). Passing a NULL pointer. \nYou have to preallocate a BMPImage struct.");
+        return -1;
+    }
 
-BMPImage* openImage(FILE *fd) {
-    BMPImage *image = malloc(sizeof(BMPImage));
+    FILE *fd = fopen(inputFile, "rb");
+    if (fd == NULL ) {
+        printf("Cannot open input file");
+        return -1;
+    }
 
     // Read File Header
     BMPFileHeader *fileHeader = &image->fileHeader;
 
     fread(&fileHeader->signature, sizeof(fileHeader->signature), 1, fd);
     if (BM != fileHeader->signature) {
-        free(image);
-        return NULL;
+        printf("Bad .bmp file signature.");
+        return -1;
     }
     fread(&fileHeader->fileSize, sizeof(fileHeader->fileSize), 1, fd);
     fread(&fileHeader->reserved, sizeof(fileHeader->reserved), 1, fd);
@@ -40,14 +47,89 @@ BMPImage* openImage(FILE *fd) {
     if (infoHeader->bitsPerPixel < 8) {
         unsigned int n = 1 << infoHeader->bitsPerPixel; // exponentiation
         image->colorTable = malloc(sizeof(ColorInfo) * n);
+
         for (unsigned int i = 0; i < n; i++) {
             ColorInfo *aux = malloc(sizeof(ColorInfo));
-            fread(aux, sizeof(ColorInfo), 1, fd);
+            fread(&aux->red, sizeof(aux->red), 1, fd);
+            fread(&aux->blue, sizeof(aux->green), 1, fd);
+            fread(&aux->green, sizeof(aux->blue), 1, fd);
+            fread(&aux->unnused, sizeof(aux->unnused), 1, fd);
             image->colorTable[i] = aux;
         }
     }
 
-    return image;
+    // Read bitmap content
+    char *bitmap = malloc(sizeof(char) * infoHeader->imageSize);
+    for (unsigned int i = 0; i < infoHeader->imageSize; i++){
+        fread(&bitmap[i], sizeof(char), 1, fd);
+    }
+    image->content = bitmap;
+
+    // free resources
+    fclose(fd);
+
+    return 0;
+}
+
+// Write a BMP image into a file
+int saveImage(char *outputFile, BMPImage *image) {
+    printf("\nSaving File");
+    FILE *fd = fopen(outputFile, "wb");
+    if (fd == NULL) {
+        perror("Cannot open the result file");
+        return -1;
+    }
+
+    // Writing BMPFileHeader fields separately
+    fwrite(&image->fileHeader.signature, sizeof(image->fileHeader.signature), 1, fd);
+    fwrite(&image->fileHeader.fileSize, sizeof(image->fileHeader.fileSize), 1, fd);
+    fwrite(&image->fileHeader.reserved, sizeof(image->fileHeader.reserved), 1, fd);
+    fwrite(&image->fileHeader.dataOffset, sizeof(image->fileHeader.dataOffset), 1, fd);
+
+    // Writing BMPInfoHeader fields separately
+    fwrite(&image->infoHeader.size, sizeof(image->infoHeader.size), 1, fd);
+    fwrite(&image->infoHeader.width, sizeof(image->infoHeader.width), 1, fd);
+    fwrite(&image->infoHeader.height, sizeof(image->infoHeader.height), 1, fd);
+    fwrite(&image->infoHeader.planes, sizeof(image->infoHeader.planes), 1, fd);
+    fwrite(&image->infoHeader.bitsPerPixel, sizeof(image->infoHeader.bitsPerPixel), 1, fd);
+    fwrite(&image->infoHeader.compression, sizeof(image->infoHeader.compression), 1, fd);
+    fwrite(&image->infoHeader.imageSize, sizeof(image->infoHeader.imageSize), 1, fd);
+    fwrite(&image->infoHeader.horizontalResolution, sizeof(image->infoHeader.horizontalResolution), 1, fd);
+    fwrite(&image->infoHeader.verticalResolution, sizeof(image->infoHeader.verticalResolution), 1, fd);
+    fwrite(&image->infoHeader.usedColors, sizeof(image->infoHeader.usedColors), 1, fd);
+    fwrite(&image->infoHeader.importantColors, sizeof(image->infoHeader.importantColors), 1, fd);
+
+    // Write the colors table
+    if (image->infoHeader.bitsPerPixel <= 8 && image->colorTable != NULL) {
+        unsigned int numColors = 1 << image->infoHeader.bitsPerPixel; // 2^bitsPerPixel
+        for (unsigned int i = 0; i < numColors; i++) {
+            fwrite(image->colorTable[i], sizeof(ColorInfo), 1, fd);
+        }
+    }
+
+    // Write the content
+    if (image->content) {
+        fwrite(image->content, image->infoHeader.imageSize, 1, fd);
+    }
+
+    fclose(fd);
+    printf("\nFile saved succesfully: %s\n", outputFile);
+
+    return 0;
+}
+
+// Convert bytes to KB, MB or GB
+void formatBytes(unsigned int bytes, char *output) {
+    const char *units[] = {"Bytes", "KB", "MB", "GB"};
+    int unitIndex = 0;
+    double convertedSize = (double)bytes;
+
+    while (convertedSize >= 1024 && unitIndex < 3) {
+        convertedSize /= 1024;
+        unitIndex++;
+    }
+
+    snprintf(output, 50, "%.2f %s", convertedSize, units[unitIndex]);
 }
 
 void printBMPFileHeader(BMPFileHeader *fh){
@@ -87,7 +169,7 @@ void printBMPInfoHeader(BMPInfoHeader *ih) {
 void printColorTable(ColorInfo **colorTable, unsigned short size) {
     printf("\n\n\033[32mColors table\033[0m");
     if (size == 0 || colorTable == NULL || colorTable[0] == NULL) {
-        printf("\nEmpty color table");
+        printf("\nEmpty color table\n");
         return;
     }
 
@@ -99,24 +181,11 @@ void printColorTable(ColorInfo **colorTable, unsigned short size) {
         printf("\nReserved %lu bytes", sizeof(entry->unnused));
         printf("\n-------------");
     }
+    printf("\n");
 }
 
 void printBMPImageInfo(BMPImage *img){
     printBMPFileHeader(&img->fileHeader);
     printBMPInfoHeader(&img->infoHeader);
     printColorTable(img->colorTable, img->infoHeader.bitsPerPixel);
-}
-
-// Convert bytes to KB, MB or GB
-void formatBytes(unsigned int bytes, char *output) {
-    const char *units[] = {"Bytes", "KB", "MB", "GB"};
-    int unitIndex = 0;
-    double convertedSize = (double)bytes;
-
-    while (convertedSize >= 1024 && unitIndex < 3) {
-        convertedSize /= 1024;
-        unitIndex++;
-    }
-
-    snprintf(output, 50, "%.2f %s", convertedSize, units[unitIndex]);
 }

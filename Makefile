@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -std=c99 -I./bmp
+CFLAGS = -Wall -Wextra -std=c99 -I./bmp -g
 
 # Source files
 SRCS = main.c utils.c bmp/bmp_utils.c

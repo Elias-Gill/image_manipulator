@@ -22,25 +22,36 @@ The structure of a .bmp is like:
 #include<stdio.h>
 #include<stdlib.h>
 
-char file[65] = "/home/elias/Proyectos/c_projects/image_manipulator/dead_star.bmp";
+// TODO: recibir como parametro
+char inputFile[65] = "/home/elias/Proyectos/c_projects/image_manipulator/dead_star.bmp";
+char outputFile[65] = "/tmp/result.bmp";
 
 int main() {
-    FILE *fd = fopen(file, "rb");
-    if (!fd) {
-        printf("Cannot open file");
-        return 1;
-    }
+    int err; 
+    printf("\nExtracting file data\nFile: %s", inputFile);
 
-    printf("\nExtracting file data\nFile: %s", file);
-
-    BMPImage *image = openImage(fd);
-    if (image == NULL) {
-        return 1;
+    BMPImage *image = malloc(sizeof(BMPImage));
+    err = loadImage(inputFile, image);
+    if (err != 0) {
+        return err;
     }
 
     printBMPImageInfo(image);
 
+    // Find the negative of an image
+    for (unsigned int i = 0; i < image->infoHeader.imageSize; i++) {
+        // Invert the pixel value (bitwise NOT)
+        image->content[i] = ~ image->content[i];
+    }
+
+    // Store result file
+    err = saveImage(outputFile, image);
+    if (err != 0) {
+        return err;
+    }
+
     // free resources
-    fclose(fd);
     free(image);
+
+    return 0;
 }

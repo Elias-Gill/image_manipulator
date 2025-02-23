@@ -55,13 +55,13 @@ typedef struct {
 } BMPImage;
 
 // Functions to operate over bmp files
-BMPImage* openImage(FILE *fd);
+int loadImage(char *inputFile, BMPImage *image);
+int saveImage(char *outputFile, BMPImage *image);
 
 // Utility functions to print the contents of the headers
 void printBMPFileHeader(BMPFileHeader *fh);
 void printBMPInfoHeader(BMPInfoHeader *ih);
 void printColorTable(ColorInfo **colorTable, unsigned short size);
-
 void printBMPImageInfo(BMPImage *img);
 
 #endif // BMP_HEADER_H
