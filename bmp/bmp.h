@@ -60,6 +60,7 @@ BMPImage* openImage(FILE *fd);
 // Utility functions to print the contents of the headers
 void printBMPFileHeader(BMPFileHeader *fh);
 void printBMPInfoHeader(BMPInfoHeader *ih);
+void printColorTable(ColorInfo **colorTable, unsigned short size);
 
 void printBMPImageInfo(BMPImage *img);
 

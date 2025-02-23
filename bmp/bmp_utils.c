@@ -84,12 +84,28 @@ void printBMPInfoHeader(BMPInfoHeader *ih) {
     printf("\nImportant colors: %u \t\tsize: %lu bytes", ih->importantColors, sizeof(ih->importantColors));
 }
 
+void printColorTable(ColorInfo **colorTable, unsigned short size) {
+    printf("\n\n\033[32mColors table\033[0m");
+    if (size == 0 || colorTable == NULL || colorTable[0] == NULL) {
+        printf("\nEmpty color table");
+        return;
+    }
+
+    for (unsigned short i = 0; i < size; i++) {
+        ColorInfo *entry = colorTable[i];
+        printf("\nGreen: %i", entry->red);
+        printf("\nGreen: %i", entry->green);
+        printf("\nGreen: %i", entry->blue);
+        printf("\nReserved %lu bytes", sizeof(entry->unnused));
+        printf("\n-------------");
+    }
+}
+
 void printBMPImageInfo(BMPImage *img){
     printBMPFileHeader(&img->fileHeader);
     printBMPInfoHeader(&img->infoHeader);
+    printColorTable(img->colorTable, img->infoHeader.bitsPerPixel);
 }
-
-// TODO: print color table info
 
 // Convert bytes to KB, MB or GB
 void formatBytes(unsigned int bytes, char *output) {
