@@ -6,7 +6,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -I./bmp
 
 # Source files
-SRCS = main.c utils.c bmp/bmp_utils.c
+SRCS = $(wildcard *.c) $(wildcard */*.c)
 
 # Object files (placed in /out)
 OBJS = $(SRCS:%.c=out/%.o)
