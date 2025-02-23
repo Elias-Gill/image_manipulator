@@ -5,5 +5,6 @@
 
 void negative(BMPImage *image);
 void grayScale(BMPImage *image);
+void sepia(BMPImage *image);
 
 #endif

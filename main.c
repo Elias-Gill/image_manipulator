@@ -21,13 +21,43 @@ The structure of a .bmp is like:
 #include"bmp/bmp.h"
 #include"filters/filters.h"
 #include<stdio.h>
+#include<string.h>
 #include<stdlib.h>
 
-// TODO: recibir como parametro
-char inputFile[65] = "/home/elias/Proyectos/c_projects/image_manipulator/dead_star.bmp";
-char outputFile[65] = "/tmp/result.bmp";
+int main(int argc, char **argv) {
+    char defaultOutput[60] = "/tmp/result.bmp";
+    if (argc < 3) {
+        printf("Usage: \n\tbmp_program filter inputFile [outputFile]\n");
+        printf("Available filters:\n- sepia\n- grayScale\n- negative");
 
-int main() {
+        if (argc == 2 && strcmp(argv[1], "--help") == 0) {
+            return 0;
+        }
+        return 1;
+    }
+
+    char *filter = argv[1];
+    char *inputFile = argv[2];
+    char *outputFile;
+    if (argc > 3) {
+        outputFile = argv[1];
+    } else {
+        outputFile = defaultOutput;
+    }
+
+    // Select operation
+    void (*operation)(BMPImage *);
+    if(strcmp(filter, "grayScale")) {
+        operation = &grayScale;
+    } else if(strcmp(filter, "negative")) {
+        operation = &negative;
+    } else if(strcmp(filter, "sepia")) {
+        operation = &sepia;
+    } else {
+        printf("Invalid filter");
+        return 1;
+    }
+
     int err; 
     printf("\nExtracting file data\nFile: %s", inputFile);
 
@@ -38,8 +68,7 @@ int main() {
     }
 
     printBMPImageInfo(image);
-
-    grayScale(image);
+    operation(image);
 
     // Store result file
     err = saveImage(outputFile, image);
