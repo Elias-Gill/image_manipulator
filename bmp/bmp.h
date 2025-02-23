@@ -57,6 +57,7 @@ typedef struct {
 // Functions to operate over bmp files
 int loadImage(char *inputFile, BMPImage *image);
 int saveImage(char *outputFile, BMPImage *image);
+void freeImage(BMPImage *image);
 
 // Utility functions to print the contents of the headers
 void printBMPFileHeader(BMPFileHeader *fh);

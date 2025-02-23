@@ -56,6 +56,8 @@ int loadImage(char *inputFile, BMPImage *image) {
             fread(&aux->unnused, sizeof(aux->unnused), 1, fd);
             image->colorTable[i] = aux;
         }
+    } else {
+        image->colorTable = NULL;
     }
 
     // Read bitmap content
@@ -118,6 +120,30 @@ int saveImage(char *outputFile, BMPImage *image) {
     return 0;
 }
 
+void freeImage(BMPImage *image) {
+    if (image == NULL) {
+        return;
+    }
+
+    // Free the colorTable
+    if (image->colorTable != NULL) {
+        unsigned int numColors = 1 << image->infoHeader.bitsPerPixel; // 2^bitsPerPixel
+        for (unsigned short i = 0; i < numColors; i++) {
+            free(image->colorTable[i]);
+        }
+        free(image->colorTable);  // Free the colorTable pointer itself
+    }
+
+    // Free the image content
+    if (image->content != NULL) {
+        free(image->content);  // Free the image pixel data
+    }
+
+    // Free the BMP headers (fileHeader and infoHeader) is not necesary 
+    // because they are not dynamically allocated
+    free(image);
+}
+
 // Convert bytes to KB, MB or GB
 void formatBytes(unsigned int bytes, char *output) {
     const char *units[] = {"Bytes", "KB", "MB", "GB"};
@@ -168,16 +194,21 @@ void printBMPInfoHeader(BMPInfoHeader *ih) {
 
 void printColorTable(ColorInfo **colorTable, unsigned short size) {
     printf("\n\n\033[32mColors table\033[0m");
-    if (size == 0 || colorTable == NULL || colorTable[0] == NULL) {
+    if (size == 0 || colorTable == NULL) {
         printf("\nEmpty color table\n");
         return;
     }
 
     for (unsigned short i = 0; i < size; i++) {
+        if (colorTable[i] == NULL) {
+            printf("\nError: colorTable[%d] is NULL\n", i);
+            continue;  // Skip this entry
+        }
         ColorInfo *entry = colorTable[i];
-        printf("\nGreen: %i", entry->red);
+
+        printf("\nRed: %i", entry->red);
         printf("\nGreen: %i", entry->green);
-        printf("\nGreen: %i", entry->blue);
+        printf("\nBlue: %i", entry->blue);
         printf("\nReserved %lu bytes", sizeof(entry->unnused));
         printf("\n-------------");
     }

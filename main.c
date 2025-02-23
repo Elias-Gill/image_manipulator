@@ -51,7 +51,7 @@ int main() {
     }
 
     // free resources
-    free(image);
+    freeImage(image);
 
     return 0;
 }

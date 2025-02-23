@@ -2,7 +2,8 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -std=c99 -I./bmp -g
+# for memmory sanitization use: "-g -fsanitize=address"
+CFLAGS = -Wall -Wextra -std=c99 -I./bmp
 
 # Source files
 SRCS = main.c utils.c bmp/bmp_utils.c
