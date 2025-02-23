@@ -19,6 +19,7 @@ The structure of a .bmp is like:
 */
 
 #include"bmp/bmp.h"
+#include"filters/filters.h"
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -38,11 +39,7 @@ int main() {
 
     printBMPImageInfo(image);
 
-    // Find the negative of an image
-    for (unsigned int i = 0; i < image->infoHeader.imageSize; i++) {
-        // Invert the pixel value (bitwise NOT)
-        image->content[i] = ~ image->content[i];
-    }
+    grayScale(image);
 
     // Store result file
     err = saveImage(outputFile, image);

@@ -4,6 +4,8 @@
 #include<stdlib.h>
 #include<string.h>
 
+// TODO: read the pixels depending of bitsPerPixel
+
 int loadImage(char *inputFile, BMPImage *image) {
     if (image == NULL) {
         printf("Bad use of loadImage(). Passing a NULL pointer. \nYou have to preallocate a BMPImage struct.");
@@ -61,9 +63,9 @@ int loadImage(char *inputFile, BMPImage *image) {
     }
 
     // Read bitmap content
-    char *bitmap = malloc(sizeof(char) * infoHeader->imageSize);
+    unsigned char *bitmap = malloc(sizeof(unsigned char) * infoHeader->imageSize);
     for (unsigned int i = 0; i < infoHeader->imageSize; i++){
-        fread(&bitmap[i], sizeof(char), 1, fd);
+        fread(&bitmap[i], sizeof(unsigned char), 1, fd);
     }
     image->content = bitmap;
 

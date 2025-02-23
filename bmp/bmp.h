@@ -41,17 +41,17 @@ typedef struct {
 // This header is only present if bitsPerPixel is less than 8.
 // Colors should be ordered by importance.
 typedef struct {
-    char red;       // red intensity
-    char green;     // green intensity
-    char blue;      // blue intensity
-    char unnused;   // value 0, this is reserved and not used
+    unsigned char red;       // red intensity
+    unsigned char green;     // green intensity
+    unsigned char blue;      // blue intensity
+    unsigned char unnused;   // value 0, this is reserved and not used
 } ColorInfo;
 
 typedef struct {
     BMPFileHeader fileHeader;
     BMPInfoHeader infoHeader;
     ColorInfo     **colorTable;  // A list of data for the colors (thats why a double pointer)
-    char          *content;     // The Image.size pixels of the image
+    unsigned char *content;     // The Image.size pixels of the image
 } BMPImage;
 
 // Functions to operate over bmp files
