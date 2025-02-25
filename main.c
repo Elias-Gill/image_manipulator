@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     }
 
     // Select operation (avoid loading the file if the parameters are malformed)
-    void (*operation)(BMPImage *);
+    void (*operation)(BMPImage *) = NULL;
     if(strcmp(filter, "grayScale") == 0) {
         operation = &grayScale;
     }
@@ -58,6 +58,9 @@ int main(int argc, char **argv) {
     }
     if(strcmp(filter, "warmer") == 0) {
         operation = &warmer;
+    }
+    if(strcmp(filter, "superSaturation") == 0) {
+        operation = &superSaturation;
     }
     if(operation == NULL) {
         printf("Invalid filter");

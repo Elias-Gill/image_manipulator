@@ -18,7 +18,14 @@ void grayScale(BMPImage *image) {
         unsigned char green = image->content[i+1];
         unsigned char red = image->content[i+2];
 
-        unsigned char gray = (unsigned char)(0.299 * red + 0.587 * green + 0.114 * blue);
+        unsigned int auxGray = (unsigned int)(0.299 * red + 0.587 * green + 0.114 * blue);
+        unsigned char gray = 0;
+        if (auxGray > 255) {
+            gray = 255;
+        } else {
+            gray = auxGray;
+        }
+
         image->content[i] = gray;
         image->content[i+1] = gray;
         image->content[i+2] = gray;
@@ -69,4 +76,27 @@ void warmer(BMPImage *image) {
 
         i += 2;
     }
+}
+
+// Applyes a gray scale filter and if gray > 127 then gray = 255 else gray = 0
+void superSaturation(BMPImage *image){
+    for (unsigned int i = 0; i < image->infoHeader.imageSize; i++) {
+        unsigned char blue = image->content[i];
+        unsigned char green = image->content[i+1];
+        unsigned char red = image->content[i+2];
+
+        unsigned int auxGray = (unsigned int)(0.299 * red + 0.587 * green + 0.114 * blue);
+        unsigned char gray = 0;
+        if (auxGray > 127) {
+            gray = 255;
+        } else {
+            gray = 0;
+        }
+
+        image->content[i] = gray;
+        image->content[i+1] = gray;
+        image->content[i+2] = gray;
+
+        i += 2;
+    } 
 }
