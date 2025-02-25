@@ -40,24 +40,31 @@ int main(int argc, char **argv) {
     char *inputFile = argv[2];
     char *outputFile;
     if (argc > 3) {
-        outputFile = argv[1];
+        outputFile = argv[3];
     } else {
         outputFile = defaultOutput;
     }
 
-    // Select operation
+    // Select operation (avoid loading the file if the parameters are malformed)
     void (*operation)(BMPImage *);
-    if(strcmp(filter, "grayScale")) {
+    if(strcmp(filter, "grayScale") == 0) {
         operation = &grayScale;
-    } else if(strcmp(filter, "negative")) {
+    }
+    if(strcmp(filter, "negative") == 0) {
         operation = &negative;
-    } else if(strcmp(filter, "sepia")) {
+    }
+    if(strcmp(filter, "sepia") == 0) {
         operation = &sepia;
-    } else {
+    }
+    if(strcmp(filter, "warmer") == 0) {
+        operation = &warmer;
+    }
+    if(operation == NULL) {
         printf("Invalid filter");
         return 1;
     }
 
+    // Load file data
     int err; 
     printf("\nExtracting file data\nFile: %s", inputFile);
 
@@ -66,8 +73,9 @@ int main(int argc, char **argv) {
     if (err != 0) {
         return err;
     }
-
     printBMPImageInfo(image);
+
+    // Apply filter 
     operation(image);
 
     // Store result file
