@@ -218,10 +218,15 @@ void load16BitContent(FILE *fd, BMPImage *image) {
         unsigned short colors;
         fread(&colors, sizeof(colors), 1, fd);
 
-        // parse colors using bit wise operations;
-        unsigned char red = (colors << 1) >> 11;    
-        unsigned char green = (colors << 6) >> 11;
-        unsigned char blue = (colors << 11) >> 11;
+        // Parse colors using bitwise operations
+        unsigned char red = (colors >> 10) & 0x1F;    // Extract red (bits 10-14)
+        unsigned char green = (colors >> 5) & 0x1F;  // Extract green (bits 5-9)
+        unsigned char blue = colors & 0x1F;          // Extract blue (bits 0-4)
+
+        // Scale 5-bit values to 8-bit (0-255 range)
+        red = (red << 3) | (red >> 2);     // Scale 5-bit to 8-bit
+        green = (green << 3) | (green >> 2); // Scale 5-bit to 8-bit
+        blue = (blue << 3) | (blue >> 2);   // Scale 5-bit to 8-bit
 
         Pixel pixel = {
             .red = red, 
@@ -293,11 +298,15 @@ void write16BitContent(FILE *fd, BMPImage *image) {
     for (unsigned int i = 0; i < image->pixelsCount; i++) {
         Pixel pixel = image->pixels[i];
 
-        // Pack the values inside 16bits
-        unsigned short colors = ((pixel.red >> 3) << 11) |
-            ((pixel.green >> 3) << 6) |
-            (pixel.blue >> 3);
+        // Scale 8-bit values to 5-bit
+        unsigned short red = (pixel.red >> 3) & 0x1F;   // 5 bits for red
+        unsigned short green = (pixel.green >> 3) & 0x1F; // 5 bits for green
+        unsigned short blue = (pixel.blue >> 3) & 0x1F;  // 5 bits for blue
 
+        // Pack the values into a 16-bit unsigned short
+        unsigned short colors = (red << 10) | (green << 5) | blue;
+
+        // Write the 16-bit color value to the file
         fwrite(&colors, sizeof(colors), 1, fd);
     }
 }
