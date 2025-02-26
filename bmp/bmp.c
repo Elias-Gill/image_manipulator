@@ -4,7 +4,20 @@
 #include<stdlib.h>
 #include<string.h>
 
-// TODO: read the pixels depending of bitsPerPixel
+
+void loadMonochromeContent(FILE *fd, BMPImage *image);
+void load4BitContent(FILE *fd, BMPImage *image);
+void load8BitContent(FILE *fd, BMPImage *image);
+void load16BitContent(FILE *fd, BMPImage *image);
+void load24BitContent(FILE *fd, BMPImage *image);
+void load32BitContent(FILE *fd, BMPImage *image);
+
+void writeMonochromeContent(FILE *fd, BMPImage *image);
+void write4BitContent(FILE *fd, BMPImage *image);
+void write8BitContent(FILE *fd, BMPImage *image);
+void write16BitContent(FILE *fd, BMPImage *image);
+void write24BitContent(FILE *fd, BMPImage *image);
+void write32BitContent(FILE *fd, BMPImage *image);
 
 int loadImage(char *inputFile, BMPImage *image) {
     if (image == NULL) {
@@ -33,7 +46,7 @@ int loadImage(char *inputFile, BMPImage *image) {
     // Read Info Header
     BMPInfoHeader *infoHeader = &image->infoHeader;
 
-    fread(&infoHeader->size, sizeof(infoHeader->size), 1, fd);
+    fread(&infoHeader->headerSize, sizeof(infoHeader->headerSize), 1, fd);
     fread(&infoHeader->width, sizeof(infoHeader->width), 1, fd);
     fread(&infoHeader->height, sizeof(infoHeader->height), 1, fd);
     fread(&infoHeader->planes, sizeof(infoHeader->planes), 1, fd);
@@ -63,11 +76,29 @@ int loadImage(char *inputFile, BMPImage *image) {
     }
 
     // Read bitmap content
-    unsigned char *bitmap = malloc(sizeof(unsigned char) * infoHeader->imageSize);
-    for (unsigned int i = 0; i < infoHeader->imageSize; i++){
-        fread(&bitmap[i], sizeof(unsigned char), 1, fd);
+    unsigned int n = infoHeader->width * infoHeader->height;
+    image->pixels = malloc(sizeof(Pixel) * n);
+    image->pixelsCount = n;
+
+    switch(infoHeader->bitsPerPixel) {
+        case 1:
+            /*err = loadMonochromeContent(fd, image, content)*/
+            break;
+        case 4:
+            break;
+        case 8:
+            /*load8BitContent(fd, image);*/
+            break;
+        case 16:
+            load16BitContent(fd, image);
+            break;
+        case 24:
+            load24BitContent(fd, image);
+            break;
+        case 32:
+            load32BitContent(fd, image);
+            break;
     }
-    image->content = bitmap;
 
     // free resources
     fclose(fd);
@@ -91,7 +122,7 @@ int saveImage(char *outputFile, BMPImage *image) {
     fwrite(&image->fileHeader.dataOffset, sizeof(image->fileHeader.dataOffset), 1, fd);
 
     // Writing BMPInfoHeader fields separately
-    fwrite(&image->infoHeader.size, sizeof(image->infoHeader.size), 1, fd);
+    fwrite(&image->infoHeader.headerSize, sizeof(image->infoHeader.headerSize), 1, fd);
     fwrite(&image->infoHeader.width, sizeof(image->infoHeader.width), 1, fd);
     fwrite(&image->infoHeader.height, sizeof(image->infoHeader.height), 1, fd);
     fwrite(&image->infoHeader.planes, sizeof(image->infoHeader.planes), 1, fd);
@@ -111,9 +142,27 @@ int saveImage(char *outputFile, BMPImage *image) {
         }
     }
 
-    // Write the content
-    if (image->content) {
-        fwrite(image->content, image->infoHeader.imageSize, 1, fd);
+    // TODO: Write the content
+    if (image->pixels != NULL) {
+        switch(image->infoHeader.bitsPerPixel) {
+            case 1:
+                /*err = writeMonochromeContent(fd, image, content)*/
+                break;
+            case 4:
+                break;
+            case 8:
+                /*write8BitContent(fd, image);*/
+                break;
+            case 16:
+                write16BitContent(fd, image);
+                break;
+            case 24:
+                write24BitContent(fd, image);
+                break;
+            case 32:
+                write32BitContent(fd, image);
+                break;
+        }
     }
 
     fclose(fd);
@@ -137,8 +186,8 @@ void freeImage(BMPImage *image) {
     }
 
     // Free the image content
-    if (image->content != NULL) {
-        free(image->content);  // Free the image pixel data
+    if (image->pixels != NULL) {
+        free(image->pixels);
     }
 
     // Free the BMP headers (fileHeader and infoHeader) is not necesary 
@@ -146,79 +195,134 @@ void freeImage(BMPImage *image) {
     free(image);
 }
 
-// Convert bytes to KB, MB or GB
-void formatBytes(unsigned int bytes, char *output) {
-    const char *units[] = {"Bytes", "KB", "MB", "GB"};
-    int unitIndex = 0;
-    double convertedSize = (double)bytes;
+// FIX: not implemented yet
+void loadMonochromeContent(FILE *fd, BMPImage *image){
+    /*return 1;*/
+}
 
-    while (convertedSize >= 1024 && unitIndex < 3) {
-        convertedSize /= 1024;
-        unitIndex++;
+// FIX: not implemented yet
+void load4BitContent(FILE *fd, BMPImage *image){
+    /*return 1;*/
+}
+
+// FIX: not implemented yet
+void load8BitContent(FILE *fd, BMPImage *image) {
+    /*return 1;*/
+}
+
+/*The value for blue is in the least significant 5 bits, 
+  followed by 5 bits for green and 
+  5 bits for red, respectively. The most significant bit is not used.*/
+void load16BitContent(FILE *fd, BMPImage *image) {
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        unsigned short colors;
+        fread(&colors, sizeof(colors), 1, fd);
+
+        // parse colors using bit wise operations;
+        unsigned char red = (colors << 1) >> 11;    
+        unsigned char green = (colors << 6) >> 11;
+        unsigned char blue = (colors << 11) >> 11;
+
+        Pixel pixel = {
+            .red = red, 
+            .green = green, 
+            .blue = blue
+        };
+
+        image->pixels[i] = pixel;
     }
-
-    snprintf(output, 50, "%.2f %s", convertedSize, units[unitIndex]);
 }
 
-void printBMPFileHeader(BMPFileHeader *fh){
-    // Extract bytes from signature (little-endian)
-    char signature[3];                                  // Buffer to store the signature as a string
-    signature[0] = (char)(fh->signature & 0xFF);        // Lest significative byte ('B')
-    signature[1] = (char)((fh->signature >> 8) & 0xFF); // Most significative byte ('M')
-    signature[2] = '\0';                                // Null terminator
-                                                    
-    char fileSize[32];
-    formatBytes(fh->fileSize, fileSize);
+void load24BitContent(FILE *fd, BMPImage *image){
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        unsigned char red, green, blue;
 
-    printf("\n\n\033[32mFile header\033[0m");
-    printf("\n\033[35mHeader field \t\t\tField size\033[0m");
-    printf("\nSignature: %s \t\t\tsize: %lu bytes", signature, sizeof(fh->signature));
-    printf("\nFile size: %s \t\tsize: %lu bytes", fileSize, sizeof(fh->fileSize));
-    printf("\nReserved \t\t\tsize: %lu bytes", sizeof(fh->reserved));
-    printf("\nData offset: %i \t\tsize: %lu bytes", fh->dataOffset, sizeof(fh->dataOffset));
-}
+        // NOTE: kep in this specific order
+        fread(&blue, sizeof(unsigned char), 1, fd);
+        fread(&green, sizeof(unsigned char), 1, fd);
+        fread(&red, sizeof(unsigned char), 1, fd);
 
-void printBMPInfoHeader(BMPInfoHeader *ih) {
-    printf("\n\n\033[32mImage info header\033[0m");
-    printf("\n\033[35mHeader field \t\t\tField size\033[0m");
-    printf("\nSize: %u \t\t\tsize: %lu bytes", ih->size, sizeof(ih->size));
-    printf("\nWidth: %u \t\t\tsize: %lu bytes", ih->width, sizeof(ih->width));
-    printf("\nHeight: %u \t\t\tsize: %lu bytes", ih->height, sizeof(ih->height));
-    printf("\nPlanes: %u \t\t\tsize: %lu bytes", ih->planes, sizeof(ih->planes));
-    printf("\nBits per pixel: %u \t\tsize: %lu bytes", ih->bitsPerPixel, sizeof(ih->bitsPerPixel));
-    printf("\nCompression: %u \t\t\tsize: %lu bytes", ih->compression, sizeof(ih->compression));
-    printf("\nImage size: %i bytes \tsize: %lu bytes", ih->imageSize, sizeof(ih->imageSize));
-    printf("\nX-resolution: %u \t\tsize: %lu bytes", ih->horizontalResolution, sizeof(ih->horizontalResolution));
-    printf("\nY-resolution: %u \t\tsize: %lu bytes", ih->verticalResolution, sizeof(ih->verticalResolution));
-    printf("\nUsed colors: %u \t\t\tsize: %lu bytes", ih->usedColors, sizeof(ih->usedColors));
-    printf("\nImportant colors: %u \t\tsize: %lu bytes", ih->importantColors, sizeof(ih->importantColors));
-}
+        Pixel pixel = {
+            .red = red, 
+            .green = green, 
+            .blue = blue
+        };
 
-void printColorTable(ColorInfo **colorTable, unsigned short size) {
-    printf("\n\n\033[32mColors table\033[0m");
-    if (size == 0 || colorTable == NULL) {
-        printf("\nEmpty color table\n");
-        return;
+        image->pixels[i] = pixel;
     }
-
-    for (unsigned short i = 0; i < size; i++) {
-        if (colorTable[i] == NULL) {
-            printf("\nError: colorTable[%d] is NULL\n", i);
-            continue;  // Skip this entry
-        }
-        ColorInfo *entry = colorTable[i];
-
-        printf("\nRed: %i", entry->red);
-        printf("\nGreen: %i", entry->green);
-        printf("\nBlue: %i", entry->blue);
-        printf("\nReserved %lu bytes", sizeof(entry->unnused));
-        printf("\n-------------");
-    }
-    printf("\n");
 }
 
-void printBMPImageInfo(BMPImage *img){
-    printBMPFileHeader(&img->fileHeader);
-    printBMPInfoHeader(&img->infoHeader);
-    printColorTable(img->colorTable, img->infoHeader.bitsPerPixel);
+// NOTE: When using 32 bits per pixel, the 4 byte is the alpha channel. For this project im not counting (yet)
+// the alpha channel, so I'm ignoring it's content.
+void load32BitContent(FILE *fd, BMPImage *image){
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        unsigned char red, green, blue, unnused;
+
+        // NOTE: kep in this specific order
+        fread(&blue, sizeof(unsigned char), 1, fd);
+        fread(&green, sizeof(unsigned char), 1, fd);
+        fread(&red, sizeof(unsigned char), 1, fd);
+        fread(&unnused, sizeof(unsigned char), 1, fd); // skip over the alpha channel
+
+        Pixel pixel = {
+            .red = red, 
+            .green = green, 
+            .blue = blue
+        };
+
+        image->pixels[i] = pixel;
+    }
+}
+
+// FIX: not implemented yet
+void writeMonochromeContent(FILE *fd, BMPImage *image){
+    /*return 1;*/
+}
+
+// FIX: not implemented yet
+void write4BitContent(FILE *fd, BMPImage *image){
+    /*return 1;*/
+}
+
+// FIX: not implemented yet
+void write8BitContent(FILE *fd, BMPImage *image) {
+    /*return 1;*/
+}
+
+void write16BitContent(FILE *fd, BMPImage *image) {
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        Pixel pixel = image->pixels[i];
+
+        // Pack the values inside 16bits
+        unsigned short colors = ((pixel.red >> 3) << 11) |
+            ((pixel.green >> 3) << 6) |
+            (pixel.blue >> 3);
+
+        fwrite(&colors, sizeof(colors), 1, fd);
+    }
+}
+
+void write24BitContent(FILE *fd, BMPImage *image) {
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        Pixel pixel = image->pixels[i];
+
+        // Nota: keep this specific order
+        fwrite(&pixel.blue, sizeof(unsigned char), 1, fd);
+        fwrite(&pixel.green, sizeof(unsigned char), 1, fd);
+        fwrite(&pixel.red, sizeof(unsigned char), 1, fd);
+    }
+}
+
+void write32BitContent(FILE *fd, BMPImage *image) {
+    unsigned char alpha = 0xFF; // default value for alpha channel (ignored)
+
+    for (unsigned int i = 0; i < image->pixelsCount; i++) {
+        Pixel pixel = image->pixels[i];
+
+        // Nota: keep this specific order
+        fwrite(&pixel.blue, sizeof(unsigned char), 1, fd);
+        fwrite(&pixel.green, sizeof(unsigned char), 1, fd);
+        fwrite(&pixel.red, sizeof(unsigned char), 1, fd);
+        fwrite(&alpha, sizeof(unsigned char), 1, fd);
+    }
 }

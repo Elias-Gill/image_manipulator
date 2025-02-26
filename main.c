@@ -28,7 +28,8 @@ int main(int argc, char **argv) {
     char defaultOutput[60] = "/tmp/result.bmp";
     if (argc < 3) {
         printf("Usage: \n\tbmp_program filter inputFile [outputFile]\n");
-        printf("Available filters:\n- sepia\n- grayScale\n- negative");
+        printf("Available filters:%s%s%s%s%s%s", "\n- sepia", "\n- grayScale", "\n- negative", "\n- warmer",
+                "\n- superSaturation", "\n- greener");
 
         if (argc == 2 && strcmp(argv[1], "--help") == 0) {
             return 0;
@@ -58,6 +59,9 @@ int main(int argc, char **argv) {
     }
     if(strcmp(filter, "warmer") == 0) {
         operation = &warmer;
+    }
+    if(strcmp(filter, "greener") == 0) {
+        operation = &greener;
     }
     if(strcmp(filter, "superSaturation") == 0) {
         operation = &superSaturation;

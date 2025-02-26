@@ -8,5 +8,6 @@ void grayScale(BMPImage *image);
 void sepia(BMPImage *image);
 void warmer(BMPImage *image);
 void superSaturation(BMPImage *image);
+void greener(BMPImage *image);
 
 #endif

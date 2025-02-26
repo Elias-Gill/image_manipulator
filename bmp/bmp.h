@@ -20,7 +20,7 @@ typedef struct {
    for the bitmap */
 typedef struct {
     // Image resolution and size specification
-    unsigned int size;                  // size of the info header (40 bytes)
+    unsigned int headerSize;            // size of the info header (40 bytes)
     unsigned int width;                 // image width
     unsigned int height;                // image height
     unsigned short planes;              // expected to be 1
@@ -47,11 +47,20 @@ typedef struct {
     unsigned char unnused;   // value 0, this is reserved and not used
 } ColorInfo;
 
+// Represents a pixel with its color values in RGB
+typedef struct {
+    unsigned char green;
+    unsigned char red;
+    unsigned char blue;
+} Pixel;
+
 typedef struct {
     BMPFileHeader fileHeader;
     BMPInfoHeader infoHeader;
-    ColorInfo     **colorTable;  // A list of data for the colors (thats why a double pointer)
-    unsigned char *content;     // The Image.size pixels of the image
+    ColorInfo     **colorTable; // A list of data for the colors (thats why a double pointer)
+
+    unsigned int  pixelsCount;  // the amount of pixels of the image
+    Pixel         *pixels;      // The Image.size pixels of the image
 } BMPImage;
 
 // Functions to operate over bmp files
