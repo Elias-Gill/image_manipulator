@@ -5,16 +5,10 @@
 #include<string.h>
 
 
-void loadMonochromeContent(FILE *fd, BMPImage *image);
-void load4BitContent(FILE *fd, BMPImage *image);
-void load8BitContent(FILE *fd, BMPImage *image);
 void load16BitContent(FILE *fd, BMPImage *image);
 void load24BitContent(FILE *fd, BMPImage *image);
 void load32BitContent(FILE *fd, BMPImage *image);
 
-void writeMonochromeContent(FILE *fd, BMPImage *image);
-void write4BitContent(FILE *fd, BMPImage *image);
-void write8BitContent(FILE *fd, BMPImage *image);
 void write16BitContent(FILE *fd, BMPImage *image);
 void write24BitContent(FILE *fd, BMPImage *image);
 void write32BitContent(FILE *fd, BMPImage *image);
@@ -81,14 +75,6 @@ int loadImage(char *inputFile, BMPImage *image) {
     image->pixelsCount = n;
 
     switch(infoHeader->bitsPerPixel) {
-        case 1:
-            /*err = loadMonochromeContent(fd, image, content)*/
-            break;
-        case 4:
-            break;
-        case 8:
-            /*load8BitContent(fd, image);*/
-            break;
         case 16:
             load16BitContent(fd, image);
             break;
@@ -98,6 +84,10 @@ int loadImage(char *inputFile, BMPImage *image) {
         case 32:
             load32BitContent(fd, image);
             break;
+        default:
+            fprintf(stderr, "Unsuported bits per pixel format");
+            fclose(fd);
+            return -1;
     }
 
     // free resources
@@ -144,14 +134,6 @@ int saveImage(char *outputFile, BMPImage *image) {
     // TODO: Write the content
     if (image->pixels != NULL) {
         switch(image->infoHeader.bitsPerPixel) {
-            case 1:
-                /*err = writeMonochromeContent(fd, image, content)*/
-                break;
-            case 4:
-                break;
-            case 8:
-                /*write8BitContent(fd, image);*/
-                break;
             case 16:
                 write16BitContent(fd, image);
                 break;
@@ -161,6 +143,12 @@ int saveImage(char *outputFile, BMPImage *image) {
             case 32:
                 write32BitContent(fd, image);
                 break;
+            default:
+                fprintf(stderr, "Unsuported bits per pixel format");
+                // Discard changes to the file
+                freopen(NULL, "w", fd);
+                fclose(fd);
+                return -1;
         }
     }
 
@@ -191,21 +179,6 @@ void freeImage(BMPImage *image) {
     // Free the BMP headers (fileHeader and infoHeader) is not necesary 
     // because they are not dynamically allocated
     free(image);
-}
-
-// FIX: not implemented yet
-void loadMonochromeContent(FILE *fd, BMPImage *image){
-    /*return 1;*/
-}
-
-// FIX: not implemented yet
-void load4BitContent(FILE *fd, BMPImage *image){
-    /*return 1;*/
-}
-
-// FIX: not implemented yet
-void load8BitContent(FILE *fd, BMPImage *image) {
-    /*return 1;*/
 }
 
 /*The value for blue is in the least significant 5 bits, 
@@ -275,21 +248,6 @@ void load32BitContent(FILE *fd, BMPImage *image){
 
         image->pixels[i] = pixel;
     }
-}
-
-// FIX: not implemented yet
-void writeMonochromeContent(FILE *fd, BMPImage *image){
-    /*return 1;*/
-}
-
-// FIX: not implemented yet
-void write4BitContent(FILE *fd, BMPImage *image){
-    /*return 1;*/
-}
-
-// FIX: not implemented yet
-void write8BitContent(FILE *fd, BMPImage *image) {
-    /*return 1;*/
 }
 
 void write16BitContent(FILE *fd, BMPImage *image) {

@@ -10,9 +10,6 @@
 
 // List of BMP files to test
 static char *BMP_FILES[] = {
-    BMP_VARIANTS_FOLDER "monochrome.bmp",
-    BMP_VARIANTS_FOLDER "4bpp.bmp",
-    BMP_VARIANTS_FOLDER "8bpp.bmp",
     BMP_VARIANTS_FOLDER "16bpp.bmp",
     BMP_VARIANTS_FOLDER "24bpp.bmp",
     BMP_VARIANTS_FOLDER "32bpp.bmp"
@@ -67,14 +64,14 @@ int main() {
         if (image == NULL) {
             fprintf(stderr, "%sError: Memory allocation failed for file: %s%s\n", COLOR_RED, input_file, COLOR_RESET);
             all_tests_passed = 0;
-            continue; // Skip to the next file
+            continue;
         }
 
         int err = loadImage(input_file, image);
         if (err != 0) {
             fprintf(stderr, "%sError: Failed to load image: %s%s\n", COLOR_RED, input_file, COLOR_RESET);
             all_tests_passed = 0;
-            continue; // Skip to the next file
+            continue;
         }
 
         err = saveImage(OUT_TEST_FILE, image);
@@ -82,14 +79,14 @@ int main() {
             fprintf(stderr, "%sError: Failed to save image: %s%s\n", COLOR_RED, input_file, COLOR_RESET);
             freeImage(image);
             all_tests_passed = 0;
-            continue; // Skip to the next file
+            continue;
         }
 
         if (compareFiles(input_file, OUT_TEST_FILE) != 0) {
             fprintf(stderr, "%sError: File comparison failed for: %s%s\n", COLOR_RED, input_file, COLOR_RESET);
             freeImage(image);
             all_tests_passed = 0;
-            continue; // Skip to the next file
+            continue;
         }
 
         freeImage(image);
@@ -97,9 +94,9 @@ int main() {
 
     if (all_tests_passed) {
         printf("%sAll tests passed!%s\n", COLOR_GREEN, COLOR_RESET);
+        return 0;
     } else {
         fprintf(stderr, "%sSome tests failed!%s\n", COLOR_RED, COLOR_RESET);
+        return 1;
     }
-
-    return all_tests_passed ? 0 : 1;
 }
