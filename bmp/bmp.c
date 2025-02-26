@@ -21,13 +21,13 @@ void write32BitContent(FILE *fd, BMPImage *image);
 
 int loadImage(char *inputFile, BMPImage *image) {
     if (image == NULL) {
-        printf("Bad use of loadImage(). Passing a NULL pointer. \nYou have to preallocate a BMPImage struct.");
+        fprintf(stderr, "Bad use of loadImage(). Passing a NULL pointer. \nYou have to preallocate a BMPImage struct.");
         return -1;
     }
 
     FILE *fd = fopen(inputFile, "rb");
     if (fd == NULL ) {
-        printf("Cannot open input file");
+        fprintf(stderr, "Cannot open input file: %s", inputFile);
         return -1;
     }
 
@@ -36,7 +36,7 @@ int loadImage(char *inputFile, BMPImage *image) {
 
     fread(&fileHeader->signature, sizeof(fileHeader->signature), 1, fd);
     if (BM != fileHeader->signature) {
-        printf("Bad .bmp file signature.");
+        fprintf(stderr, "Bad .bmp file signature.");
         return -1;
     }
     fread(&fileHeader->fileSize, sizeof(fileHeader->fileSize), 1, fd);
@@ -108,10 +108,9 @@ int loadImage(char *inputFile, BMPImage *image) {
 
 // Write a BMP image into a file
 int saveImage(char *outputFile, BMPImage *image) {
-    printf("\nSaving File");
     FILE *fd = fopen(outputFile, "wb");
     if (fd == NULL) {
-        perror("Cannot open the result file");
+        fprintf(stderr, "Cannot write over the output file %s\n", outputFile);
         return -1;
     }
 
@@ -166,7 +165,6 @@ int saveImage(char *outputFile, BMPImage *image) {
     }
 
     fclose(fd);
-    printf("\nFile saved succesfully: %s\n", outputFile);
 
     return 0;
 }

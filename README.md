@@ -46,3 +46,11 @@ Alternativelly:
 ```bash
 make run
 ```
+
+## Testing
+
+A simple test suit is implemented, which works compiling the main program with the `test.c` file instead
+of `main.c`. This tests are performed mainly over the load and save of images using some small test images.
+
+Testing images by [Maxim Berg](https://unsplash.com/@maxberg?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash") on [Unsplash](https://unsplash.com/photos/a-purple-and-blue-knot-on-a-white-background-UXUSL4CteJI?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
+

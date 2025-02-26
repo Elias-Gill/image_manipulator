@@ -31,10 +31,12 @@ int main(int argc, char **argv) {
         printf("Available filters:%s%s%s%s%s%s", "\n- sepia", "\n- grayScale", "\n- negative", "\n- warmer",
                 "\n- superSaturation", "\n- greener");
 
+        // If help flag was submited
         if (argc == 2 && strcmp(argv[1], "--help") == 0) {
             return 0;
         }
-        return 1;
+
+        return -1;
     }
 
     char *filter = argv[1];
@@ -67,8 +69,8 @@ int main(int argc, char **argv) {
         operation = &superSaturation;
     }
     if(operation == NULL) {
-        printf("Invalid filter");
-        return 1;
+        fprintf(stderr, "Invalid filter selection: %s", filter);
+        return -1;
     }
 
     // Load file data
@@ -86,10 +88,12 @@ int main(int argc, char **argv) {
     operation(image);
 
     // Store result file
+    printf("Saving image to: %s", outputFile);
     err = saveImage(outputFile, image);
     if (err != 0) {
         return err;
     }
+    printf("File saved succesfully!");
 
     // free resources
     freeImage(image);
