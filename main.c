@@ -68,6 +68,9 @@ int main(int argc, char **argv) {
     if(strcmp(filter, "superSaturation") == 0) {
         operation = &superSaturation;
     }
+    if(strcmp(filter, "borders") == 0) {
+        operation = &borders;
+    }
     if(operation == NULL) {
         fprintf(stderr, "Invalid filter selection: %s", filter);
         return -1;

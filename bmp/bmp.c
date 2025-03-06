@@ -189,8 +189,8 @@ void load16BitContent(FILE *fd, BMPImage *image) {
         unsigned short colors;
         fread(&colors, sizeof(colors), 1, fd);
 
-        // Parse colors using bitwise operations
-        unsigned char red = (colors >> 10) & 0x1F;    // Extract red (bits 10-14)
+        // Parse colors using bitwise operations (0x1F = 0b11111)
+        unsigned char red = (colors >> 10) & 0x1F;   // Extract red (bits 10-14)
         unsigned char green = (colors >> 5) & 0x1F;  // Extract green (bits 5-9)
         unsigned char blue = colors & 0x1F;          // Extract blue (bits 0-4)
 

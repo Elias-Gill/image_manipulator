@@ -54,9 +54,8 @@ int compareFiles(const char *file1, const char *file2) {
     return result;
 }
 
-int main() {
+int testImageParsing() {
     int all_tests_passed = 1; // Assume all tests will pass initially
-
     for (size_t i = 0; i < NUM_BMP_FILES; i++) {
         char *input_file = BMP_FILES[i];
 
@@ -91,6 +90,66 @@ int main() {
 
         freeImage(image);
     }
+
+    return all_tests_passed;
+}
+
+// Helper function for comparing pixels
+int comparePixels(Pixel a, Pixel b) {
+    return a.red == b.red && a.green == b.green && a.blue == b.blue;
+}
+
+int testGetPixel() {
+    int all_tests_passed = 1; // Assume all tests will pass initially
+
+    // Test image setup
+    Pixel pixels[6] = {
+        {0, 255, 0}, {255, 0, 0},
+        {0, 0, 255}, {255, 255, 255},
+        {0, 0, 255}, {255, 255, 255}
+    };
+    Pixel emptyPixel = {.red = 0, .green = 0, .blue = 0};
+
+    BMPImage image = {
+        .infoHeader = {40, .width = 2, .height = 3, 1, 24, 0, 0, 0, 0, 0, 0},
+        .pixels = pixels,
+        .pixelsCount = 6
+    };
+
+    void checkPixel(BMPImage *image, int x, int y, Pixel expected) {
+        Pixel actual = getPixel(image, x, y, emptyPixel);
+        if (!comparePixels(actual, expected)) {
+            fprintf(stderr, "Error: Pixel mismatch at (%d, %d): expected (%d, %d, %d), got (%d, %d, %d)\n",
+                    x, y,
+                    expected.red, expected.green, expected.blue,
+                    actual.red, actual.green, actual.blue);
+            all_tests_passed = 0;
+        }
+    }
+
+    // Tests within bounds
+    checkPixel(&image, 0, 0, pixels[0]);
+    checkPixel(&image, 1, 0, pixels[1]);
+    checkPixel(&image, 0, 2, pixels[4]);
+    checkPixel(&image, 0, 1, pixels[2]);
+
+    // Tests out of bounds (should return emptyPixel)
+    checkPixel(&image, 3, 0, emptyPixel); // x out of bounds
+    checkPixel(&image, 0, 3, emptyPixel); // y out of bounds
+    checkPixel(&image, -1, 0, emptyPixel); // negative x
+    checkPixel(&image, 0, -1, emptyPixel); // negative y
+    checkPixel(&image, 2, 2, emptyPixel);  // both out of bounds
+
+    return all_tests_passed;
+}
+
+
+int main() {
+    int all_tests_passed = 1; // Assume all tests will pass initially
+
+    // test functions
+    all_tests_passed = testImageParsing() & 1;
+    all_tests_passed = testGetPixel() & 1;
 
     if (all_tests_passed) {
         printf("%sAll tests passed!%s\n", COLOR_GREEN, COLOR_RESET);

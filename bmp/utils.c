@@ -1,5 +1,7 @@
 #include<bmp.h>
 
+Pixel emptyPixel = {.red = 0, .green = 0, .blue = 0};
+
 // Convert bytes to KB, MB or GB
 void formatBytes(unsigned int bytes, char *output) {
     const char *units[] = {"Bytes", "KB", "MB", "GB"};
@@ -75,4 +77,18 @@ void printBMPImageInfo(BMPImage *img){
     printBMPFileHeader(&img->fileHeader);
     printBMPInfoHeader(&img->infoHeader);
     printColorTable(img->colorTable, img->infoHeader.bitsPerPixel);
+}
+
+// When a requested pixel is out of bounds, then a empty full black pixel is given as a default value
+Pixel getPixel(BMPImage *image, int x, int y, Pixel fallback) {
+    if (x < 0 || y < 0 || x >= (int)image->infoHeader.width || y >= (int)image->infoHeader.height) {
+        return fallback;
+    }
+
+    unsigned int coordinate = (image->infoHeader.width * y) + x;
+    if (coordinate >= image->pixelsCount) {
+        return fallback;
+    }
+
+    return image->pixels[coordinate];
 }

@@ -1,5 +1,4 @@
 #include"filters.h"
-#include<stdlib.h>
 
 // Find the negative of an image
 void negative(BMPImage *image) {
