@@ -13,5 +13,6 @@ void greener(BMPImage *image);
 
 // Mask filters
 void borders(BMPImage *image);
+void focus(BMPImage *image);
 
 #endif

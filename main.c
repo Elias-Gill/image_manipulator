@@ -71,6 +71,9 @@ int main(int argc, char **argv) {
     if(strcmp(filter, "borders") == 0) {
         operation = &borders;
     }
+    if(strcmp(filter, "focus") == 0) {
+        operation = &focus;
+    }
     if(operation == NULL) {
         fprintf(stderr, "Invalid filter selection: %s", filter);
         return -1;
